@@ -3,6 +3,17 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.1</TargetFramework>
+    <Authors>Coding Enthusiast</Authors>
+    <Company>Autarkysoft</Company>
+    <Copyright>Copyright © Coding Enthusiast 2019</Copyright>
+    <PackageProjectUrl>https://github.com/Autarkysoft/LearnMining</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/Autarkysoft/LearnMining/blob/master/LICENSE</PackageLicenseUrl>
+    <RepositoryUrl>https://github.com/Autarkysoft/LearnMining</RepositoryUrl>
+    <AssemblyVersion>0.9.0.0</AssemblyVersion>
+    <FileVersion>0.9.0.0</FileVersion>
+    <Version>0.9.0</Version>
+    <PackageTags>bitcoin; litecoin; mining; sha256; scrypt</PackageTags>
+    <Description>This project is an attempt at exploring mining algorithms used by different cryptocurrencies starting from bitcoin. It is written from scratch in c# and is tried to be the most optimized.</Description>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
