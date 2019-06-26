@@ -230,6 +230,9 @@ namespace LearnMining
                     // incremented block time
                     blockTime = (blockTime.SwapEndian() + 1).SwapEndian();
                     blkPt2[1] = blockTime;
+
+                    // Make sure nonce starts from zero
+                    startingNonce = 0;
                 }
             }
         }
