@@ -143,7 +143,6 @@ namespace LearnMining
                     /*** Second block (64 byte) ***/
                     // (final 4 bytes) 32/32 byte MerkleRoot
                     blkPt2[0] = (uint)(b[28] << 24 | b[29] << 16 | b[30] << 8 | b[31]); ;
-                    blkPt2[0] = 0x831c9e99U;
                 }
 
 
