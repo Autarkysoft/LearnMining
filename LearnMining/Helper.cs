@@ -87,7 +87,8 @@ namespace LearnMining
         public static void PrintHashrate(ulong hashCount, double seconds)
         {
             int res = (int)(hashCount / seconds);
-            Console.WriteLine($"Hashrate is: {res:N0} H/sec = {res / 1000:N0} MH/sec");
+            string mhs = (res <= 10_000) ? $"{(double)res / 1000:N1}" : $"{res / 1000:N0}";
+            Console.WriteLine($"Hashrate is: {res:N0} H/sec = {mhs} MH/sec");
         }
 
     }
