@@ -51,6 +51,12 @@ namespace LearnMining
     {
         public unsafe void Mine()
         {
+            Console.WriteLine();
+            Console.WriteLine("SHA-256 miner is selected.");
+            Console.WriteLine("For more information about mining bitcoin visit: https://en.bitcoin.it/wiki/Mining and https://en.bitcoin.it/wiki/Mining");
+            Console.WriteLine("For more information about SHA-256 algorithm visit: https://tools.ietf.org/html/rfc6234");
+            Console.WriteLine();
+
             uint blockVersion = 0x01000000U;
             // bitcoin reports hash hexes in reverse order hence the revarse=true in following two lines
             byte[] prvBlockHash = Helper.HexToBytes("000000006a625f06636b8bb6ac7b960a8d03705d1ace08b1a19da3fdcc99ddbd", true);
