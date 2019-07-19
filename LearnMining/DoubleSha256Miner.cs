@@ -109,8 +109,25 @@ namespace LearnMining
 
 
             fixed (uint* blkPt1 = &block1[0], blkPt2 = &block2[0], blkPt3 = &block3[0])
-            fixed (uint* hPt1 = &hashState1[0], hPt2 = &hashState2[0], hPt3 = &hashState3[0], wPt = &w[0])
+            fixed (uint* hPt1 = &hashState1[0], hPt3 = &hashState3[0], wPt = &w[0])
             {
+                // Second hash block (block3):
+                // Final block is a single 64 byte block starting with the 32 byte result of the first hash with the padding.
+                // Instead of having a different hashState for second CompressBlock() call we use this block 
+                // and set the other values here to avoid repetition.
+                // blkPt3 index 0 to 7 are being  set when CompressBlock() is called on second block in first hash
+                blkPt3[8] = 0b10000000_00000000_00000000_00000000U; // 1 followed by 0 bits to fill pad1
+                //blkPt3[9] = 0;
+                //blkPt3[10] = 0;
+                //blkPt3[11] = 0;
+                //blkPt3[12] = 0;
+                //blkPt3[13] = 0;
+
+                // Message length for pad2, since message is the 32 byte result of previous hash, length is 256 bit
+                //blkPt3[14] = 0; 
+                blkPt3[15] = 256;
+
+
                 /*** First block (64 byte) ***/
                 // 4 byte block version
                 blkPt1[0] = blockVersion;
@@ -177,31 +194,11 @@ namespace LearnMining
                     {
                         blkPt2[3] = (uint)nonce;
                         // instead of Init() the hashstate for this block is previous hashstate
-                        Buffer.BlockCopy(hashState1, 0, hashState2, 0, 32);
+                        // instead of new hashState and then copying it for second hash we use block3
+                        // in other words blkPt3 acts as both hashState2 and block3
+                        Buffer.BlockCopy(hashState1, 0, block3, 0, 32);
                         /*** Perform first hash on block 2/2 ***/
-                        CompressBlock(blkPt2, hPt2, wPt);
-
-                        // perform second hash
-                        // Result of previous hash (hashState2[]) is now our new block. So copy it here:
-                        blkPt3[0] = hPt2[0];
-                        blkPt3[1] = hPt2[1];
-                        blkPt3[2] = hPt2[2];
-                        blkPt3[3] = hPt2[3];
-                        blkPt3[4] = hPt2[4];
-                        blkPt3[5] = hPt2[5];
-                        blkPt3[6] = hPt2[6];
-                        blkPt3[7] = hPt2[7]; // 8*4 = 32 byte hash result
-
-                        blkPt3[8] = 0b10000000_00000000_00000000_00000000U; // 1 followed by 0 bits to fill pad1
-                        //blkPt3[9] = 0;
-                        //blkPt3[10] = 0;
-                        //blkPt3[11] = 0;
-                        //blkPt3[12] = 0;
-                        //blkPt3[13] = 0;
-
-                        // Message length for pad2, since message is the 32 byte result of previous hash, length is 256 bit
-                        //blkPt3[14] = 0; 
-                        blkPt3[15] = 256;
+                        CompressBlock(blkPt2, blkPt3, wPt);
 
                         /*** Perform second hash on block 1/1 ***/
                         // Now initialize hashState to compute next round
@@ -376,7 +373,6 @@ namespace LearnMining
         private readonly uint[] block2 = new uint[16];
         private readonly uint[] block3 = new uint[16];
         private readonly uint[] hashState1 = new uint[8];
-        private readonly uint[] hashState2 = new uint[8];
         private readonly uint[] hashState3 = new uint[8];
 
         private readonly uint[] Ks =
