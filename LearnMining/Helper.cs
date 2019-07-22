@@ -43,6 +43,50 @@ namespace LearnMining
             return ba;
         }
 
+        public static unsafe bool CompareTarget(uint* hash, uint* target, int length)
+        {
+            for (int i = length - 1; i >= 0; i--)
+            {
+                if (target[i] == 0 && hash[i] != 0)
+                {
+                    return false;
+                }
+                else if (target[i] == 0 && hash[i] == 0)
+                {
+                    continue;
+                }
+                else
+                {
+                    uint h = hash[i].SwapEndian();
+                    uint t = target[i].SwapEndian();
+                    if (h > t)
+                    {
+                        return false;
+                    }
+                    else if (h < t)
+                    {
+                        return true;
+                    }
+                    else if (target[i - 1] != 0) // && hash[i] == target[i]
+                    {
+                        h = hash[i - 1].SwapEndian();
+                        t = target[i - 1].SwapEndian();
+                        if (h > t)
+                        {
+                            return false;
+                        }
+                        else if (h < t)
+                        {
+                            return true;
+                        }
+                        // target will never have more than 2 items in it
+                    }
+                    // else -> rare case that hash[i]==target[i] && hash[i-1]==target[i-1] the remaining items must be 0
+                }
+            }
+            return false;
+        }
+
         public static byte[] ReadHex(string msg, int size, bool reverse = false)
         {
             while (true)

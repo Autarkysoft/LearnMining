@@ -78,28 +78,24 @@ namespace LearnMining
 
 
             /*** Target ***/
+            uint[] targetArr = new uint[32 / 4];
+            /*** Target ***/
             // if bits = XXYYYYYY then target = YYYYYY * 2^(8*(XX-3))
-            // X * 2^k is the same as x << k
-            int shift = 8 * ((byte)nBits - 3);
-            // total is 256 bit, and 3*8 is the 3 bytes left in nBits that are shifted
-            int zeroCount = (256 - shift - (3 * 8)) // this is number of zero bits
-                / 8; // this is number of zero bytes
-            uint target = nBits & 0xffffff00;
-            for (int i = 1; i < 4; i++)
-            {
-                // if any of the bytes in remaining nBits is zero add 1 byte zero to zeroCount.
-                // example: xxxx00 should add 1
-                if ((byte)(target >> (i * 8)) == 0)
-                {
-                    zeroCount++;
-                }
-                else
-                {
-                    break;
-                }
-            }
+            // a * 2^k is the same as a << k
+            int shift2 = 8 * ((byte)nBits - 3);
+            // We have 3 bytes that we need to shift left and since we are using UInt32, 3 bytes (24 bit) can fall in 1 item or 2 max.
+            // Each 32 bit shift moves to next index from the end. Each remainder is the shift of the remaining 3 bytes.
+            // if the remainder is bigger than 8 bits the shifted 24 bits will go in next item.
+            // 00000000_XXXXXXXX_XXXXXXXX_XXXXXXXX << 9 => 00000000_00000000_00000000_0000000X XXXXXXXX_XXXXXXXX_XXXXXXX0_00000000
 
-            zeroCount /= 4; // now this is the number of UInt32 items in array that must be zero
+            // NOTE: with the reversed endian used here, everything is in reverse:
+            int index = shift2 / 32;
+            int remShift = shift2 % 32;
+            targetArr[index] = (nBits & 0xffffff00) >> remShift;
+            if (remShift > 8)
+            {
+                targetArr[index + 1] = (nBits & 0xffffff00) << (32 - remShift);
+            }
 
 
 
@@ -110,6 +106,7 @@ namespace LearnMining
 
             fixed (uint* blkPt1 = &block1[0], blkPt2 = &block2[0], blkPt3 = &block3[0])
             fixed (uint* hPt1 = &hashState1[0], hPt3 = &hashState3[0], wPt = &w[0])
+            fixed (uint* tarPt = &targetArr[0])
             {
                 // Second hash block (block3):
                 // Final block is a single 64 byte block starting with the 32 byte result of the first hash with the padding.
@@ -207,16 +204,7 @@ namespace LearnMining
 
 
                         // Check to see if the hash result is smaller than target
-                        bool b = true;
-                        for (int i = 0; i < zeroCount; i++)
-                        {
-                            if (hPt3[7 - i] != 0)
-                            {
-                                b = false;
-                                break;
-                            }
-                        }
-                        if (b && hPt3[7 - zeroCount] <= target)
+                        if (Helper.CompareTarget(hPt3, tarPt, hashState3.Length))
                         {
                             watch.Stop();
 
