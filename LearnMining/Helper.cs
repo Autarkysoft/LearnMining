@@ -87,6 +87,30 @@ namespace LearnMining
             return false;
         }
 
+        public static uint[] ToTarget(uint compactTarget)
+        {
+            uint[] target = new uint[32 / 4];
+            /*** Target ***/
+            // if bits = XXYYYYYY then target = YYYYYY * 2^(8*(XX-3))
+            // a * 2^k is the same as a << k
+            int shift2 = 8 * ((byte)compactTarget - 3);
+            // We have 3 bytes that we need to shift left and since we are using UInt32, 3 bytes (24 bit) can fall in 1 item or 2 max.
+            // Each 32 bit shift moves to next index from the end. Each remainder is the shift of the remaining 3 bytes.
+            // if the remainder is bigger than 8 bits the shifted 24 bits will go in next item.
+            // 00000000_XXXXXXXX_XXXXXXXX_XXXXXXXX << 9 => 00000000_00000000_00000000_0000000X XXXXXXXX_XXXXXXXX_XXXXXXX0_00000000
+
+            // NOTE: with the reversed endian used here, everything is in reverse:
+            int index = shift2 / 32;
+            int remShift = shift2 % 32;
+            target[index] = (compactTarget & 0xffffff00) >> remShift;
+            if (remShift > 8)
+            {
+                target[index + 1] = (compactTarget & 0xffffff00) << (32 - remShift);
+            }
+
+            return target;
+        }
+
         public static byte[] ReadHex(string msg, int size, bool reverse = false)
         {
             while (true)
